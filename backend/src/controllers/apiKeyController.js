@@ -1,0 +1,101 @@
+const ApiKey = require('../models/ApiKey');
+
+/**
+ * Generate new API key
+ * POST /api/keys/generate
+ */
+const generateKey = async (req, res) => {
+  try {
+    const { name, environment } = req.body;
+
+    // Generate key
+    const key = ApiKey.generateKey();
+    const keyHash = ApiKey.hashKey(key);
+
+    const apiKey = new ApiKey({
+      merchantId: req.merchant._id,
+      key: key.substring(0, 8) + '...', // Store partial key for display
+      keyHash,
+      name,
+      environment: environment || 'test',
+      permissions: ['payment.create', 'payment.read'],
+    });
+
+    await apiKey.save();
+
+    res.status(201).json({
+      success: true,
+      data: {
+        id: apiKey._id,
+        key, // Only shown once!
+        name: apiKey.name,
+        environment: apiKey.environment,
+        message: 'Save this key securely. It will not be shown again.',
+      },
+    });
+  } catch (error) {
+    console.log('Error generating key:', error);
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+/**
+ * List API keys
+ * GET /api/keys
+ */
+const listKeys = async (req, res) => {
+  try {
+    const keys = await ApiKey.find({ merchantId: req.merchant._id });
+
+    res.status(200).json({
+      success: true,
+      data: keys,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+/**
+ * Revoke API key
+ * DELETE /api/keys/:keyId
+ */
+const revokeKey = async (req, res) => {
+  try {
+    const { keyId } = req.params;
+
+    const apiKey = await ApiKey.findOne({ _id: keyId, merchantId: req.merchant._id });
+
+    if (!apiKey) {
+      return res.status(404).json({
+        success: false,
+        message: 'API key not found',
+      });
+    }
+
+    apiKey.isActive = false;
+    await apiKey.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'API key revoked successfully',
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+module.exports = {
+  generateKey,
+  listKeys,
+  revokeKey,
+};
