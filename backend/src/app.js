@@ -77,7 +77,7 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
 });
 
-app.use('/api', limiter);
+app.use('/v1/api', limiter);
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -90,12 +90,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/webhooks', webhookRoutes);
-app.use('/api/keys', apiKeyRoutes);
-app.use('/api/settlements', settlementRoutes);
-app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/v1/api/auth', authRoutes);
+app.use('/v1/api/payments', paymentRoutes);
+app.use('/v1/api/webhooks', webhookRoutes);
+app.use('/v1/api/keys', apiKeyRoutes);
+app.use('/v1/api/settlements', settlementRoutes);
+app.use('/v1/api/admin', require('./routes/adminRoutes'));
 
 // Health check endpoint
 app.get('/health', (req, res) => {

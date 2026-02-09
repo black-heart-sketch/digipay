@@ -11,6 +11,8 @@ import Profile from './pages/Profile'
 import KYC from './pages/KYC'
 import DashboardLayout from './components/DashboardLayout'
 import AdminMerchants from './pages/AdminMerchants'
+import AdminMerchantDetails from './pages/AdminMerchantDetails'
+import PublicDocs from './pages/PublicDocs'
 
 function App() {
   return (
@@ -19,6 +21,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/documentation" element={<PublicDocs />} />
         
         {/* Protected Routes */}
         <Route element={<DashboardLayout />}>
@@ -30,6 +33,7 @@ function App() {
           <Route path="/docs" element={<Documentation />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/admin/merchants" element={<AdminMerchants />} />
+          <Route path="/admin/merchants/:id" element={<AdminMerchantDetails />} />
         </Route>
       </Routes>
     </Router>

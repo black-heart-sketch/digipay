@@ -32,7 +32,7 @@ const LandingPage = () => {
             <div className="hidden md:flex items-center space-x-8">
               <a href="#features" className="text-gray-700 hover:text-primary-600 transition-colors">Features</a>
               <a href="#pricing" className="text-gray-700 hover:text-primary-600 transition-colors">Pricing</a>
-              <a href="#docs" className="text-gray-700 hover:text-primary-600 transition-colors">Docs</a>
+              <Link to="/documentation" className="text-gray-700 hover:text-primary-600 transition-colors">Docs</Link>
               {localStorage.getItem('token') ? (
                 <Link to="/dashboard" className="bg-primary-600 text-white px-6 py-2 rounded-full hover:shadow-lg transition-all font-medium">
                   Dashboard
@@ -74,10 +74,10 @@ const LandingPage = () => {
                   Start Building
                   <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
                 </Link>
-                <a href="#docs" className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-lg font-semibold hover:border-primary-600 hover:text-primary-600 transition-all flex items-center justify-center">
+                <Link to="/documentation" className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-lg font-semibold hover:border-primary-600 hover:text-primary-600 transition-all flex items-center justify-center">
                   <Terminal className="mr-2 w-5 h-5" />
                   View Docs
-                </a>
+                </Link>
               </div>
               <div className="flex items-center space-x-8 text-sm text-gray-600">
                 <div className="flex items-center space-x-2">

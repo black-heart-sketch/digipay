@@ -12,4 +12,8 @@ router.get('/merchants', adminController.getAllMerchants);
 router.patch('/merchants/:id/status', adminController.updateMerchantStatus);
 router.get('/stats', adminController.getSystemStats);
 
+router.get('/merchants/:id', adminController.getMerchantDetails);
+router.get('/merchants/:id/transactions', adminController.getMerchantTransactions);
+router.post('/transactions/:id/check-status', adminController.checkTransactionStatus);
+
 module.exports = router;

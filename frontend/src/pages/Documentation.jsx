@@ -46,9 +46,9 @@ const ENDPOINTS = [
   {
     id: 'verify-payment',
     method: 'GET',
-    path: '/payments/verify/{transactionId}',
-    title: 'Verify Payment',
-    description: 'Check the status of a specific transaction.',
+    path: '/payments/transactions/{transactionId}',
+    title: 'Get Transaction Status',
+    description: 'Check the status and details of a specific transaction.',
     body: null
   }
 ]
@@ -124,7 +124,7 @@ const Documentation = () => {
   }
 
   const generateCode = (endpoint, lang, key, body) => {
-    const baseUrl = 'https://api.digipay.com/v1' // Example URL
+    const baseUrl = 'https://digitalcertify.net/v1/api' // EC2 instance URL
     const url = `${baseUrl}${endpoint.path}`
     const k = key || 'YOUR_API_KEY'
     const payload = body && Object.keys(body).length > 0 ? body : endpoint.body
@@ -132,7 +132,7 @@ const Documentation = () => {
     switch (lang) {
       case 'curl':
         return `curl -X ${endpoint.method} "${url}" \\
-  -H "Authorization: Bearer ${k}" \\
+  -H "x-api-key: ${k}" \\
   -H "Content-Type: application/json"${payload ? ` \\
   -d '${JSON.stringify(payload, null, 2)}'` : ''}`
 
@@ -143,7 +143,7 @@ const response = await axios({
   method: '${endpoint.method}',
   url: '${url}',
   headers: {
-    'Authorization': 'Bearer ${k}',
+    'x-api-key': '${k}',
     'Content-Type': 'application/json'
   }${endpoint.body ? `,
   data: ${JSON.stringify(endpoint.body, null, 2)}` : ''}
@@ -156,7 +156,7 @@ console.log(response.data);`
 
 url = "${url}"
 headers = {
-    "Authorization": "Bearer ${k}",
+    "x-api-key": "${k}",
     "Content-Type": "application/json"
 }
 ${endpoint.body ? `data = ${JSON.stringify(endpoint.body, null, 4)}
@@ -171,7 +171,7 @@ curl_setopt($ch, CURLOPT_URL, "${url}");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "${endpoint.method}");
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    "Authorization: Bearer ${k}",
+    "x-api-key: ${k}",
     "Content-Type: application/json"
 ]);
 ${endpoint.body ? `curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(${JSON.stringify(endpoint.body)}));` : ''}
@@ -190,7 +190,7 @@ import java.net.URI;
 HttpClient client = HttpClient.newHttpClient();
 HttpRequest request = HttpRequest.newBuilder()
     .uri(URI.create("${url}"))
-    .header("Authorization", "Bearer ${k}")
+    .header("x-api-key", "${k}")
     .header("Content-Type", "application/json")
     .${endpoint.method}(${endpoint.body ? `HttpRequest.BodyPublishers.ofString("${JSON.stringify(endpoint.body).replace(/"/g, '\\"')}")` : 'HttpRequest.BodyPublishers.noBody()'})
     .build();
@@ -211,7 +211,7 @@ import (
 func main() {
 	url := "${url}"
 	req, _ := http.NewRequest("${endpoint.method}", url, ${endpoint.body ? 'bytes.NewBuffer(jsonBody)' : 'nil'})
-	req.Header.Add("Authorization", "Bearer ${k}")
+	req.Header.Add("x-api-key", "${k}")
 	req.Header.Add("Content-Type", "application/json")
 
 	res, _ := http.DefaultClient.Do(req)
@@ -230,7 +230,7 @@ http = Net::HTTP.new(url.host, url.port)
 http.use_ssl = true
 
 request = Net::HTTP::${endpoint.method.charAt(0) + endpoint.method.slice(1).toLowerCase()}.new(url)
-request["Authorization"] = "Bearer ${k}"
+request["x-api-key"] = "${k}"
 request["Content-Type"] = "application/json"
 ${endpoint.body ? `request.body = JSON.dump(${JSON.stringify(endpoint.body)})` : ''}
 
@@ -244,7 +244,7 @@ using System.Text.Json;
 
 var client = new HttpClient();
 var request = new HttpRequestMessage(HttpMethod.${endpoint.method.charAt(0) + endpoint.method.slice(1).toLowerCase()}, "${url}");
-request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "${k}");
+request.Headers.Add("x-api-key", "${k}");
 ${endpoint.body ? `
 var json = JsonSerializer.Serialize(new { 
     ${Object.entries(endpoint.body).map(([k, v]) => `${k} = "${v}"`).join(',\n    ')} 
@@ -261,7 +261,7 @@ Console.WriteLine(content);`
 let url = URL(string: "${url}")!
 var request = URLRequest(url: url)
 request.httpMethod = "${endpoint.method}"
-request.setValue("Bearer ${k}", forHTTPHeaderField: "Authorization")
+request.setValue("${k}", forHTTPHeaderField: "x-api-key")
 request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
 ${endpoint.body ? `let body: [String: Any] = ${JSON.stringify(endpoint.body)}
@@ -287,7 +287,7 @@ ${endpoint.body ? `val body = "${JSON.stringify(endpoint.body).replace(/"/g, '\\
 val request = Request.Builder()
     .url("${url}")
     .${endpoint.method.toLowerCase()}(${endpoint.body ? 'body' : ''})
-    .addHeader("Authorization", "Bearer ${k}")
+    .addHeader("x-api-key", "${k}")
     .addHeader("Content-Type", "application/json")
     .build()
 
@@ -302,7 +302,7 @@ client.newCall(request).execute().use { response ->
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = reqwest::Client::new();
     let res = client.${endpoint.method.toLowerCase()}("${url}")
-        .header(header::AUTHORIZATION, "Bearer ${k}")
+        .header("x-api-key", "${k}")
         .header(header::CONTENT_TYPE, "application/json")
         ${endpoint.body ? `.json(&serde_json::json!(${JSON.stringify(endpoint.body)}))` : ''}
         .send()
@@ -372,7 +372,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
              baseAmount: requestBody.amount || 5000,
              commissionAmount: requestBody.amount ? Math.round(requestBody.amount * 0.05) : 250,
              status: "pending",
-             freemopayReference: "MTN_" + Date.now(),
+             digipayReference: "MTN_" + Date.now(),
              message: "Transaction created"
            }
          })

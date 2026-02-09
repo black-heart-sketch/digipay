@@ -35,8 +35,8 @@ const protect = async (req, res, next) => {
         });
       }
 
-      // Get merchant if user is merchant
-      if (req.user.role === 'merchant') {
+      // Get merchant if user is merchant or admin
+      if (req.user.role === 'merchant' || req.user.role === 'admin') {
         req.merchant = await Merchant.findOne({ userId: req.user._id });
       }
 

@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const User = require('../src/models/User'); // Adjust path as needed
 const connectDB = require('../src/config/database'); // Adjust path as needed
 
+const Merchant = require('../src/models/Merchant');
+
 const createAdmin = async () => {
   try {
     await connectDB();
@@ -32,6 +34,26 @@ const createAdmin = async () => {
         emailVerified: true
       });
       console.log('✅ Admin user created successfully');
+    }
+
+    // Check if merchant profile exists
+    let merchant = await Merchant.findOne({ userId: user._id });
+
+    if (!merchant) {
+      console.log('🆕 Creating merchant profile for admin...');
+      merchant = await Merchant.create({
+        userId: user._id,
+        businessName: 'DigiPay Admin',
+        businessType: 'Administrator',
+        country: 'Cameroon',
+        phone: '237000000000',
+        kycStatus: 'approved',
+        isActive: true,
+        commissionTier: 'enterprise'
+      });
+      console.log('✅ Merchant profile created for admin');
+    } else {
+      console.log('✅ Merchant profile already exists');
     }
 
     console.log('-----------------------------------');

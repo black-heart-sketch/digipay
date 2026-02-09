@@ -53,11 +53,32 @@ npm start
 - `GET /api/keys` - List API keys
 - `DELETE /api/keys/:id` - Revoke API key
 
-### Settlements (requires JWT)
+### Settlements (requires JWT or API Key)
 
-- `POST /api/settlements/request` - Request payout
-- `GET /api/settlements` - List settlements
-- `GET /api/settlements/balance` - Get balance
+- `POST /api/settlements/request` - Request payout (JWT only)
+- `GET /api/settlements` - List settlements (JWT only)
+- `GET /api/settlements/balance` - Get balance (JWT or API Key)
+
+**Get Balance Example (using API Key):**
+
+```bash
+curl -X GET "http://localhost:5001/v1/api/settlements/balance" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "balance": 100,
+    "totalRevenue": 102,
+    "totalCommissionPaid": 2
+  }
+}
+```
 
 ### Webhooks
 

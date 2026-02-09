@@ -38,6 +38,10 @@ const requestSettlement = async (merchantId, amount, recipientPhone) => {
       throw new Error('Recipient phone number is required');
     }
 
+    // Deduct balance immediately
+    merchant.balance -= amount;
+    await merchant.save();
+
     // Generate settlement ID
     const settlementId = `STL_${uuidv4().replace(/-/g, '').substring(0, 16).toUpperCase()}`;
 
@@ -70,6 +74,7 @@ const requestSettlement = async (merchantId, amount, recipientPhone) => {
       amount: settlement.amount,
       status: settlement.status,
       recipientPhone: settlement.recipientPhone,
+      newBalance: merchant.balance,
     };
 
   } catch (error) {
@@ -117,11 +122,18 @@ const processSettlement = async (settlementId) => {
   } catch (error) {
     console.error('❌ Error processing settlement:', error.message);
     
+    // Refund balance on failure
     const settlement = await Settlement.findById(settlementId);
     if (settlement) {
       settlement.status = 'failed';
       settlement.failureReason = error.message;
       await settlement.save();
+
+      // Refund the merchant
+      await Merchant.findByIdAndUpdate(settlement.merchantId, {
+        $inc: { balance: settlement.amount },
+      });
+      console.log('💰 Refunded merchant balance for failed settlement:', settlement.settlementId);
     }
   }
 };
@@ -138,14 +150,17 @@ const completeSettlement = async (settlementId) => {
       throw new Error('Settlement not found');
     }
 
+    // Prevent double processing
+    if (settlement.status === 'completed') {
+      return;
+    }
+
     settlement.status = 'completed';
     settlement.completedAt = new Date();
     await settlement.save();
 
-    // Update merchant balance
-    await Merchant.findByIdAndUpdate(settlement.merchantId, {
-      $inc: { balance: -settlement.amount },
-    });
+    // NOTE: Balance was already deducted at request time.
+    // Use this step only to mark transactions as settled.
 
     // Mark transactions as settled
     await Transaction.updateMany(

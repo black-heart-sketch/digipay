@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import axios from 'axios'
 import { 
   Users, Search, Filter, MoreVertical, 
   CheckCircle, XCircle, AlertCircle, Shield, 
   Download, RefreshCw, Trash2
 } from 'lucide-react'
-import { useAuth } from '../context/AuthContext'
+// import { useAuth } from '../context/AuthContext'
 
 const AdminMerchants = () => {
-  const { user } = useAuth()
+  // const { user } = useAuth()
   const [merchants, setMerchants] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -204,7 +205,9 @@ const AdminMerchants = () => {
                           {merchant.businessName?.charAt(0) || 'M'}
                         </div>
                         <div>
-                          <div className="font-medium text-gray-900">{merchant.businessName}</div>
+                          <Link to={`/admin/merchants/${merchant._id}`} className="font-medium text-gray-900 hover:text-primary-600 transition-colors">
+                            {merchant.businessName}
+                          </Link>
                           <div className="text-sm text-gray-500">{merchant.userId?.email}</div>
                         </div>
                       </div>
