@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Mail, Lock, AlertCircle, Coins } from 'lucide-react'
-import axios from 'axios'
+import api from '../services/api'
 
 const Login = () => {
   const navigate = useNavigate()
@@ -27,7 +27,7 @@ const Login = () => {
 
     try {
       console.log('Sending login request:', formData)
-      const response = await axios.post('/api/auth/login', formData)
+      const response = await api.post('/auth/login', formData)
       console.log('Login response:', response.data)
       
       // Store token

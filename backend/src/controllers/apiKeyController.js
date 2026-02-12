@@ -15,6 +15,15 @@ const generateKey = async (req, res) => {
       });
     }
 
+    // Check KYC status
+    if (req.merchant.kycStatus !== 'approved') {
+      return res.status(403).json({
+        success: false,
+        message: 'Your KYC verification must be approved before you can generate API keys. Please complete your KYC verification.',
+        kycStatus: req.merchant.kycStatus,
+      });
+    }
+
     // Generate key
     const key = ApiKey.generateKey();
     const keyHash = ApiKey.hashKey(key);

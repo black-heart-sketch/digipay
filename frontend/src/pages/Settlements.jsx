@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { 
-  Plus, CheckCircle, AlertCircle, Clock, Wallet, ArrowDownLeft, ArrowUpRight
+  Plus, CheckCircle, AlertCircle, Clock, Wallet, ArrowDownLeft, ArrowUpRight,
+  RefreshCw, Search, Filter, X, TrendingUp, TrendingDown
 } from 'lucide-react'
 import settlementService from '../services/settlementService'
 import transactionService from '../services/transactionService'
@@ -18,6 +19,9 @@ const Settlements = () => {
   const [payoutPhone, setPayoutPhone] = useState('')
   const [payerPhone, setPayerPhone] = useState('')
   const [error, setError] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
     fetchData()
@@ -61,33 +65,38 @@ const Settlements = () => {
     }
   }, [])
 
-  const fetchData = async () => {
+  const fetchData = async (showRefreshing = false) => {
     try {
+      if (showRefreshing) setRefreshing(true)
+      
       const balanceData = await settlementService.getBalance()
       setBalance({
-        available: balanceData.balance,
+        available: balanceData.balance || 0,
         pending: 0
       })
 
       const settlementsData = await settlementService.getSettlements()
-      setSettlements(settlementsData.docs || [])
+      setSettlements(settlementsData.settlements || settlementsData.docs || [])
       
       await fetchPayins()
       
       setLoading(false)
+      setRefreshing(false)
     } catch (error) {
       console.error('Error fetching data:', error)
       setLoading(false)
+      setRefreshing(false)
     }
   }
 
   const fetchPayins = async () => {
     try {
       // Fetch successful transactions (payins)
-      const transactions = await transactionService.getTransactions({ status: 'success', limit: 20 })
-      setPayins(transactions.docs || [])
+      const transactions = await transactionService.getTransactions({ status: 'success', limit: 50 })
+      setPayins(transactions.docs || transactions || [])
     } catch (error) {
       console.error('Error fetching payins:', error)
+      setPayins([])
     }
   }
 
@@ -96,12 +105,21 @@ const Settlements = () => {
     setError('')
 
     const value = parseFloat(amount)
+    
+    // Validate amount
+    if (!amount || isNaN(value) || value <= 0) {
+      setError('Please enter a valid amount greater than 0')
+      return
+    }
+    
     if (value < 1000) {
       setError('Minimum settlement amount is XAF 1,000')
       return
     }
+    
+    // Check if amount exceeds available balance
     if (value > balance.available) {
-      setError('Insufficient balance')
+      setError(`Insufficient balance. Available: XAF ${balance.available.toLocaleString()}, Requested: XAF ${value.toLocaleString()}`)
       return
     }
 
@@ -154,6 +172,14 @@ const Settlements = () => {
         </div>
         <div className="flex gap-2">
           <button 
+            onClick={() => fetchData(true)}
+            disabled={refreshing}
+            className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+            title="Refresh"
+          >
+            <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
+          </button>
+          <button 
             onClick={() => setShowPayinModal(true)}
             className="bg-white text-primary-600 border border-primary-200 px-4 py-2 rounded-lg font-medium hover:bg-primary-50 transition-colors flex items-center shadow-sm hover:shadow"
           >
@@ -191,7 +217,11 @@ const Settlements = () => {
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8">
           <button
-            onClick={() => setActiveTab('payouts')}
+            onClick={() => {
+              setActiveTab('payouts')
+              setSearchTerm('')
+              setStatusFilter('all')
+            }}
             className={`${
               activeTab === 'payouts'
                 ? 'border-primary-500 text-primary-600'
@@ -199,9 +229,18 @@ const Settlements = () => {
             } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors`}
           >
             Payouts (Withdrawals)
+            {settlements.length > 0 && (
+              <span className="ml-2 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                {settlements.length}
+              </span>
+            )}
           </button>
           <button
-            onClick={() => setActiveTab('payins')}
+            onClick={() => {
+              setActiveTab('payins')
+              setSearchTerm('')
+              setStatusFilter('all')
+            }}
             className={`${
               activeTab === 'payins'
                 ? 'border-primary-500 text-primary-600'
@@ -209,9 +248,55 @@ const Settlements = () => {
             } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors`}
           >
             Payins (Deposits)
+            {payins.length > 0 && (
+              <span className="ml-2 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                {payins.length}
+              </span>
+            )}
           </button>
         </nav>
       </div>
+
+      {/* Search and Filters */}
+      {!loading && (
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder={activeTab === 'payouts' ? 'Search by settlement ID, phone...' : 'Search by transaction ID, phone...'}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-10 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+          {activeTab === 'payouts' && (
+            <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
+              {['all', 'pending', 'processing', 'completed', 'failed'].map((status) => (
+                <button
+                  key={status}
+                  onClick={() => setStatusFilter(status)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                    statusFilter === status
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Content */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden min-h-[400px]">
@@ -221,81 +306,181 @@ const Settlements = () => {
           </div>
         ) : activeTab === 'payouts' ? (
           // Payouts List
-          settlements.length === 0 ? (
-            <div className="p-12 text-center text-gray-500">
-              <Clock className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-              <p className="text-lg font-medium text-gray-900">No Settlements Yet</p>
-              <p className="mt-1">Your payout history will appear here.</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-100">
-              {settlements.map((settlement) => (
-                <div key={settlement._id} className="p-6 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center space-x-4">
-                    <div className={`p-2 rounded-full ${
-                      settlement.status === 'completed' ? 'bg-green-100 text-green-600' :
-                      settlement.status === 'failed' ? 'bg-red-100 text-red-600' : 'bg-yellow-100 text-yellow-600'
-                    }`}>
-                      <ArrowUpRight className="w-5 h-5" />
+          (() => {
+            const filteredSettlements = settlements.filter(settlement => {
+              const matchesSearch = !searchTerm || 
+                settlement.settlementId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                settlement.recipientPhone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                settlement.freemopayWithdrawReference?.toLowerCase().includes(searchTerm.toLowerCase())
+              
+              const matchesStatus = statusFilter === 'all' || settlement.status === statusFilter
+              
+              return matchesSearch && matchesStatus
+            })
+
+            return filteredSettlements.length === 0 ? (
+              <div className="p-12 text-center text-gray-500">
+                <Clock className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <p className="text-lg font-medium text-gray-900">
+                  {settlements.length === 0 ? 'No Settlements Yet' : 'No matching settlements'}
+                </p>
+                <p className="mt-1">
+                  {settlements.length === 0 
+                    ? 'Your payout history will appear here.' 
+                    : 'Try adjusting your search or filters.'}
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-100">
+                {filteredSettlements.map((settlement) => (
+                  <div key={settlement._id || settlement.settlementId} className="p-6 flex items-center justify-between hover:bg-gray-50 transition-colors group">
+                    <div className="flex items-center space-x-4 flex-1">
+                      <div className={`p-3 rounded-full transition-transform group-hover:scale-110 ${
+                        settlement.status === 'completed' ? 'bg-green-100 text-green-600' :
+                        settlement.status === 'failed' ? 'bg-red-100 text-red-600' : 
+                        settlement.status === 'processing' ? 'bg-blue-100 text-blue-600' :
+                        'bg-yellow-100 text-yellow-600'
+                      }`}>
+                        {settlement.status === 'completed' ? (
+                          <CheckCircle className="w-5 h-5" />
+                        ) : settlement.status === 'failed' ? (
+                          <AlertCircle className="w-5 h-5" />
+                        ) : (
+                          <Clock className="w-5 h-5" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-gray-900 capitalize flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4" />
+                          Payout 
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                            settlement.status === 'completed' ? 'bg-green-100 text-green-700' :
+                            settlement.status === 'failed' ? 'bg-red-100 text-red-700' : 
+                            settlement.status === 'processing' ? 'bg-blue-100 text-blue-700' :
+                            'bg-yellow-100 text-yellow-700'
+                          }`}>{settlement.status}</span>
+                        </h4>
+                        <p className="text-sm text-gray-500 mt-1">
+                          {new Date(settlement.createdAt).toLocaleDateString('en-US', { 
+                            year: 'numeric', 
+                            month: 'short', 
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })} • To: {settlement.recipientPhone}
+                        </p>
+                        {settlement.settlementId && (
+                          <p className="text-xs text-gray-400 mt-1 font-mono">
+                            ID: {settlement.settlementId}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900 capitalize flex items-center">
-                        Payout 
-                        <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${
-                          settlement.status === 'completed' ? 'bg-green-100 text-green-700' :
-                          settlement.status === 'failed' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
-                        }`}>{settlement.status}</span>
-                      </h4>
-                      <p className="text-sm text-gray-500">
-                        {new Date(settlement.createdAt).toLocaleDateString()} • To: {settlement.recipientPhone}
-                      </p>
+                    <div className="text-right ml-4">
+                      <p className="font-bold text-red-600 text-lg">- XAF {(settlement.amount || 0).toLocaleString()}</p>
+                      {settlement.freemopayWithdrawReference && (
+                        <p className="text-xs text-gray-400 mt-1 font-mono break-all max-w-[150px]">
+                          Ref: {settlement.freemopayWithdrawReference}
+                        </p>
+                      )}
+                      {settlement.completedAt && (
+                        <p className="text-xs text-gray-400 mt-1">
+                          Completed: {new Date(settlement.completedAt).toLocaleDateString()}
+                        </p>
+                      )}
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-bold text-gray-900">- XAF {settlement.amount.toLocaleString()}</p>
-                    {settlement.freemopayWithdrawReference && (
-                      <p className="text-xs text-gray-400 mt-1 font-mono">
-                        Ref: {settlement.freemopayWithdrawReference}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )
+                ))}
+              </div>
+            )
+          })()
         ) : (
           // Payins List
-          payins.length === 0 ? (
-             <div className="p-12 text-center text-gray-500">
-              <ArrowDownLeft className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-              <p className="text-lg font-medium text-gray-900">No Payins Yet</p>
-              <p className="mt-1">Successful transactions will appear here.</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-100">
-              {payins.map((payin) => (
-                <div key={payin._id} className="p-6 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center space-x-4">
-                    <div className="p-2 rounded-full bg-blue-100 text-blue-600">
-                      <ArrowDownLeft className="w-5 h-5" />
+          (() => {
+            const filteredPayins = payins.filter(payin => {
+              if (!searchTerm) return true
+              const search = searchTerm.toLowerCase()
+              return (
+                payin.transactionId?.toLowerCase().includes(search) ||
+                payin.customerPhone?.toLowerCase().includes(search) ||
+                payin.freemopayReference?.toLowerCase().includes(search) ||
+                (payin.totalAmount && payin.totalAmount.toString().includes(search))
+              )
+            })
+
+            return filteredPayins.length === 0 ? (
+              <div className="p-12 text-center text-gray-500">
+                <ArrowDownLeft className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <p className="text-lg font-medium text-gray-900">
+                  {payins.length === 0 ? 'No Payins Yet' : 'No matching transactions'}
+                </p>
+                <p className="mt-1">
+                  {payins.length === 0 
+                    ? 'Successful transactions will appear here.' 
+                    : 'Try adjusting your search.'}
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-100">
+                {filteredPayins.map((payin) => (
+                  <div key={payin._id || payin.transactionId} className="p-6 flex items-center justify-between hover:bg-gray-50 transition-colors group">
+                    <div className="flex items-center space-x-4 flex-1">
+                      <div className="p-3 rounded-full bg-green-100 text-green-600 transition-transform group-hover:scale-110">
+                        <ArrowDownLeft className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-gray-900 capitalize flex items-center gap-2">
+                          <TrendingDown className="w-4 h-4 text-green-600" />
+                          Payment Received
+                          {payin.status && (
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                              payin.status === 'success' ? 'bg-green-100 text-green-700' :
+                              payin.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-red-100 text-red-700'
+                            }`}>{payin.status}</span>
+                          )}
+                        </h4>
+                        <p className="text-sm text-gray-500 mt-1">
+                          {new Date(payin.createdAt).toLocaleDateString('en-US', { 
+                            year: 'numeric', 
+                            month: 'short', 
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })} • From: {payin.customerPhone || 'Unknown'}
+                        </p>
+                        {payin.transactionId && (
+                          <p className="text-xs text-gray-400 mt-1 font-mono">
+                            TXN: {payin.transactionId}
+                          </p>
+                        )}
+                        {payin.commissionAmount && payin.commissionAmount > 0 && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            Commission: XAF {payin.commissionAmount.toLocaleString()} ({payin.commissionRate}%)
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900 capitalize">Payment Received</h4>
-                      <p className="text-sm text-gray-500">
-                        {new Date(payin.createdAt).toLocaleDateString()} • From: {payin.customerPhone || 'Unknown'}
+                    <div className="text-right ml-4">
+                      <p className="font-bold text-green-600 text-lg">
+                        + XAF {(payin.totalAmount || payin.amount || 0).toLocaleString()}
                       </p>
+                      {payin.baseAmount && payin.baseAmount !== payin.totalAmount && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          Net: XAF {payin.baseAmount.toLocaleString()}
+                        </p>
+                      )}
+                      {payin.freemopayReference && (
+                        <p className="text-xs text-gray-400 mt-1 font-mono break-all max-w-[150px]">
+                          Ref: {payin.freemopayReference}
+                        </p>
+                      )}
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-bold text-green-600">+ XAF {payin.amount.toLocaleString()}</p>
-                    <p className="text-xs text-gray-400 mt-1 font-mono">
-                      {payin.transactionId}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )
+                ))}
+              </div>
+            )
+          })()
         )}
       </div>
 
@@ -324,14 +509,38 @@ const Settlements = () => {
                       required
                       min="1000"
                       max={balance.available}
+                      step="0.01"
                       value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
+                      onChange={(e) => {
+                        const inputValue = e.target.value
+                        const numValue = parseFloat(inputValue)
+                        // Prevent entering amount greater than available balance
+                        if (inputValue === '' || (!isNaN(numValue) && numValue <= balance.available)) {
+                          setAmount(inputValue)
+                        }
+                      }}
                       placeholder="0.00"
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      className={`w-full pl-10 pr-20 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
+                        amount && parseFloat(amount) > balance.available 
+                          ? 'border-red-300 bg-red-50' 
+                          : 'border-gray-300'
+                      }`}
                     />
+                    <button
+                      type="button"
+                      onClick={() => setAmount(balance.available.toString())}
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-primary-600 hover:text-primary-700 font-medium px-2 py-1 rounded bg-primary-50 hover:bg-primary-100 transition-colors"
+                    >
+                      Max
+                    </button>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
                     Available: XAF {balance.available.toLocaleString()}
+                    {amount && parseFloat(amount) > balance.available && (
+                      <span className="text-red-600 ml-2 font-medium">
+                        (Amount exceeds available balance)
+                      </span>
+                    )}
                   </p>
                 </div>
 

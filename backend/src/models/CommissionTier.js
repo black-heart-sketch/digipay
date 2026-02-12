@@ -5,7 +5,10 @@ const commissionTierSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    enum: ['standard', 'premium', 'enterprise'],
+  },
+  description: {
+    type: String,
+    default: '',
   },
   rate: {
     type: Number,

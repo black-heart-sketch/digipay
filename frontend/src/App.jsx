@@ -12,6 +12,7 @@ import KYC from './pages/KYC'
 import DashboardLayout from './components/DashboardLayout'
 import AdminMerchants from './pages/AdminMerchants'
 import AdminMerchantDetails from './pages/AdminMerchantDetails'
+import AdminRates from './pages/AdminRates'
 import PublicDocs from './pages/PublicDocs'
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/admin/merchants" element={<AdminMerchants />} />
           <Route path="/admin/merchants/:id" element={<AdminMerchantDetails />} />
+          <Route path="/admin/rates" element={<AdminRates />} />
         </Route>
       </Routes>
     </Router>

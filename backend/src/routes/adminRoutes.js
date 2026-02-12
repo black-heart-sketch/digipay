@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
+const kycController = require('../controllers/kycController');
 const { protect } = require('../middlewares/auth');
 const adminAuth = require('../middlewares/adminAuth');
 
@@ -15,5 +16,9 @@ router.get('/stats', adminController.getSystemStats);
 router.get('/merchants/:id', adminController.getMerchantDetails);
 router.get('/merchants/:id/transactions', adminController.getMerchantTransactions);
 router.post('/transactions/:id/check-status', adminController.checkTransactionStatus);
+
+// KYC admin routes
+router.get('/kyc/:merchantId', kycController.getDocumentsByMerchant);
+router.patch('/kyc/:documentId/review', kycController.reviewDocument);
 
 module.exports = router;

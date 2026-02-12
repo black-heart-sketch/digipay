@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import axios from 'axios'
+import api from '../services/api'
 import { 
   Users, Search, Filter, MoreVertical, 
   CheckCircle, XCircle, AlertCircle, Shield, 
@@ -23,10 +23,7 @@ const AdminMerchants = () => {
   const fetchMerchants = async () => {
     try {
       setLoading(true)
-      const token = localStorage.getItem('token')
-      const response = await axios.get('/api/admin/merchants', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+      const response = await api.get('/admin/merchants')
       setMerchants(response.data.data)
     } catch (error) {
       console.error('Error fetching merchants:', error)
@@ -38,10 +35,7 @@ const AdminMerchants = () => {
   const handleStatusUpdate = async (merchantId, updates) => {
     try {
       setActionLoading(merchantId)
-      const token = localStorage.getItem('token')
-      await axios.patch(`/api/admin/merchants/${merchantId}/status`, updates, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+      await api.patch(`/admin/merchants/${merchantId}/status`, updates)
       
       // Update local state
       setMerchants(merchants.map(m => 

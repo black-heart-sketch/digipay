@@ -19,9 +19,14 @@ const requestSettlement = async (merchantId, amount, recipientPhone) => {
       throw new Error('Merchant not found');
     }
 
-    // Check if merchant has enough balance
+    // Validate amount
+    if (!amount || amount <= 0) {
+      throw new Error('Settlement amount must be greater than 0');
+    }
+
+    // Check if merchant has enough balance (initial check for better error message)
     if (merchant.balance < amount) {
-      throw new Error('Insufficient balance');
+      throw new Error(`Insufficient balance. Available balance: ${merchant.balance.toLocaleString()} XAF, Requested: ${amount.toLocaleString()} XAF`);
     }
 
     // Check minimum settlement amount
@@ -38,9 +43,35 @@ const requestSettlement = async (merchantId, amount, recipientPhone) => {
       throw new Error('Recipient phone number is required');
     }
 
-    // Deduct balance immediately
-    merchant.balance -= amount;
-    await merchant.save();
+    // Atomic balance deduction using MongoDB conditional update
+    // This prevents race conditions where multiple requests could exceed balance
+    // Only update if balance >= amount (prevents negative balance)
+    const updateResult = await Merchant.findOneAndUpdate(
+      {
+        _id: merchantId,
+        balance: { $gte: amount } // Only update if balance is sufficient
+      },
+      {
+        $inc: { balance: -amount }
+      },
+      {
+        new: true,
+        runValidators: true
+      }
+    );
+
+    // If updateResult is null, either merchant not found or insufficient balance
+    if (!updateResult) {
+      // Re-fetch merchant to get current balance for error message
+      const currentMerchant = await Merchant.findById(merchantId);
+      if (!currentMerchant) {
+        throw new Error('Merchant not found');
+      }
+      throw new Error(`Insufficient balance. Available balance: ${currentMerchant.balance.toLocaleString()} XAF, Requested: ${amount.toLocaleString()} XAF`);
+    }
+
+    // Update merchant reference with new balance
+    merchant.balance = updateResult.balance;
 
     // Generate settlement ID
     const settlementId = `STL_${uuidv4().replace(/-/g, '').substring(0, 16).toUpperCase()}`;

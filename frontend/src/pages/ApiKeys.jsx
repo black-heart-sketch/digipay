@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { 
   Plus, Trash2, Copy, Check, Key, Shield, AlertTriangle, Eye, EyeOff 
 } from 'lucide-react'
 import apiKeyService from '../services/apiKeyService'
+import api from '../services/api'
 
 const ApiKeys = () => {
   const [keys, setKeys] = useState([])
@@ -11,8 +13,12 @@ const ApiKeys = () => {
   const [newKeyData, setNewKeyData] = useState({ name: '', environment: 'test' })
   const [generatedKey, setGeneratedKey] = useState(null)
   const [copied, setCopied] = useState(false)
+  const [kycStatus, setKycStatus] = useState(null)
+  const [kycLoading, setKycLoading] = useState(true)
 
   useEffect(() => {
+    // Fetch KYC status
+    fetchKycStatus()
     // Initial fetch
     fetchKeys()
 
@@ -27,6 +33,17 @@ const ApiKeys = () => {
       unsubscribe()
     }
   }, [])
+
+  const fetchKycStatus = async () => {
+    try {
+      const response = await api.get('/auth/profile')
+      setKycStatus(response.data.data.merchant?.kycStatus || 'pending')
+    } catch (error) {
+      console.error('Error fetching KYC status:', error)
+    } finally {
+      setKycLoading(false)
+    }
+  }
 
   const fetchKeys = async () => {
     try {
@@ -80,12 +97,35 @@ const ApiKeys = () => {
         </div>
         <button 
           onClick={() => setShowModal(true)}
-          className="bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors flex items-center"
+          disabled={kycStatus !== 'approved'}
+          className="bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+          title={kycStatus !== 'approved' ? 'KYC verification required' : ''}
         >
           <Plus className="w-4 h-4 mr-2" />
           Generate New Key
         </button>
       </div>
+
+      {/* KYC Warning */}
+      {!kycLoading && kycStatus !== 'approved' && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 flex items-start space-x-4">
+          <AlertTriangle className="w-6 h-6 text-yellow-600 mt-1 flex-shrink-0" />
+          <div className="flex-1">
+            <h3 className="font-bold text-yellow-900">KYC Verification Required</h3>
+            <p className="text-yellow-700 text-sm mt-1">
+              {kycStatus === 'pending' && 'You must complete KYC verification before you can generate API keys.'}
+              {kycStatus === 'under_review' && 'Your KYC documents are under review. You\'ll be able to generate API keys once approved.'}
+              {kycStatus === 'rejected' && 'Your KYC verification was rejected. Please re-submit your documents.'}
+            </p>
+            <Link
+              to="/kyc"
+              className="inline-block mt-3 text-yellow-900 font-semibold hover:text-yellow-800 underline"
+            >
+              {kycStatus === 'pending' ? 'Complete KYC Verification →' : 'View KYC Status →'}
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Generated Key Modal/Alert */}
       {generatedKey && (

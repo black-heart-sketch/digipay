@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Mail, Lock, User, Building, Phone, Globe, AlertCircle, CheckCircle, Coins } from 'lucide-react'
-import axios from 'axios'
+import api from '../services/api'
 
 const Register = () => {
   const navigate = useNavigate()
@@ -66,7 +66,7 @@ const Register = () => {
     setError('')
 
     try {
-      const response = await axios.post('/api/auth/register', formData)
+      const response = await api.post('/auth/register', formData)
       
       // Store token
       localStorage.setItem('token', response.data.data.token)

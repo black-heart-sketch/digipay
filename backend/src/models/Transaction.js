@@ -84,12 +84,18 @@ transactionSchema.methods.markSuccess = async function(freemopayRef) {
   this.freemopayReference = freemopayRef || this.freemopayReference;
   this.freemopayWebhookReceived = true;
   
+  // Calculate net amount after commission deduction
+  // Commission is always deducted from merchant balance for cash-in transactions
+  // Balance = baseAmount - commissionAmount (amount merchant receives after commission)
+  // Total Revenue = totalAmount (full transaction amount from customer)
+  const netAmount = this.baseAmount - this.commissionAmount;
+  
   // Update merchant balance and revenue
   const Merchant = require('./Merchant');
   await Merchant.findByIdAndUpdate(this.merchantId, {
     $inc: {
-      balance: this.baseAmount,
-      totalRevenue: this.totalAmount,
+      balance: netAmount, // Amount after commission is deducted
+      totalRevenue: this.totalAmount, // Full transaction amount from customer
       totalCommissionPaid: this.commissionAmount,
     },
   });

@@ -16,6 +16,8 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const webhookRoutes = require('./routes/webhookRoutes');
 const apiKeyRoutes = require('./routes/apiKeyRoutes');
 const settlementRoutes = require('./routes/settlementRoutes');
+const kycRoutes = require('./routes/kycRoutes');
+const rateRoutes = require('./routes/rateRoutes');
 
 // Initialize Express app
 const app = express();
@@ -89,13 +91,18 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Serve uploaded files
+app.use('/uploads', express.static('uploads'));
+
 // API Routes
 app.use('/v1/api/auth', authRoutes);
 app.use('/v1/api/payments', paymentRoutes);
 app.use('/v1/api/webhooks', webhookRoutes);
 app.use('/v1/api/keys', apiKeyRoutes);
 app.use('/v1/api/settlements', settlementRoutes);
+app.use('/v1/api/kyc', kycRoutes);
 app.use('/v1/api/admin', require('./routes/adminRoutes'));
+app.use('/v1/api/admin/rates', rateRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

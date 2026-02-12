@@ -14,7 +14,8 @@ import {
   Coins, 
   ChevronDown, 
   Shield, 
-  Users 
+  Users,
+  Percent
 } from 'lucide-react'
 
 const DashboardLayout = () => {
@@ -44,6 +45,7 @@ const DashboardLayout = () => {
     { name: 'Transactions', href: '/transactions', icon: CreditCard, roles: ['merchant', 'admin'] },
     { name: 'Settlements', href: '/settlements', icon: Receipt, roles: ['merchant', 'admin'] },
     { name: 'Merchants', href: '/admin/merchants', icon: Users, roles: ['admin'] },
+    { name: 'Commission Rates', href: '/admin/rates', icon: Percent, roles: ['admin'] },
     { name: 'API Keys', href: '/api-keys', icon: Key, roles: ['merchant', 'admin'] },
     { name: 'Verification', href: '/kyc', icon: Shield, roles: ['merchant', 'admin'] },
     { name: 'Documentation', href: '/docs', icon: FileText, roles: ['merchant', 'admin'] },

@@ -9,8 +9,12 @@ const kycSchema = new mongoose.Schema({
   },
   documentType: {
     type: String,
-    enum: ['id', 'business_reg', 'proof_of_address'],
+    enum: ['id_card', 'localization_plan', 'tax_registration'],
     required: true,
+  },
+  isRequired: {
+    type: Boolean,
+    default: true,
   },
   fileUrl: {
     type: String,

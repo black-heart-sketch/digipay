@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import api from '../services/api'
+import kycService from '../services/kycService'
 import { 
   User, CreditCard, RotateCw, ArrowLeft, 
   CheckCircle, XCircle, AlertCircle, Shield,
-  DollarSign, Activity
+  DollarSign, Activity, FileText, ExternalLink
 } from 'lucide-react'
 
 const AdminMerchantDetails = () => {
@@ -12,8 +13,10 @@ const AdminMerchantDetails = () => {
   const navigate = useNavigate()
   const [merchant, setMerchant] = useState(null)
   const [transactions, setTransactions] = useState([])
+  const [kycDocuments, setKycDocuments] = useState([])
   const [loading, setLoading] = useState(true)
   const [checkingStatus, setCheckingStatus] = useState(null)
+  const [reviewingDoc, setReviewingDoc] = useState(null)
 
   useEffect(() => {
     fetchData()
@@ -22,19 +25,16 @@ const AdminMerchantDetails = () => {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const token = localStorage.getItem('token')
       
-      const [merchantRes, txnRes] = await Promise.all([
-        axios.get(`/api/admin/merchants/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get(`/api/admin/merchants/${id}/transactions`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+      const [merchantRes, txnRes, kycRes] = await Promise.all([
+        api.get(`/admin/merchants/${id}`),
+        api.get(`/admin/merchants/${id}/transactions`),
+        kycService.getMerchantDocuments(id)
       ])
 
       setMerchant(merchantRes.data.data)
       setTransactions(txnRes.data.data)
+      setKycDocuments(kycRes || [])
     } catch (error) {
       console.error('Error fetching details:', error)
     } finally {
@@ -42,18 +42,28 @@ const AdminMerchantDetails = () => {
     }
   }
 
+  const handleReviewDocument = async (documentId, status) => {
+    try {
+      setReviewingDoc(documentId)
+      await kycService.reviewDocument(documentId, status)
+      alert(`Document ${status}!`)
+      // Refresh data
+      await fetchData()
+    } catch (error) {
+      console.error('Error reviewing document:', error)
+      alert('Failed to review document')
+    } finally {
+      setReviewingDoc(null)
+    }
+  }
+
   const handleCheckStatus = async (txnId) => {
     try {
       setCheckingStatus(txnId)
-      const token = localStorage.getItem('token')
-      await axios.post(`/api/admin/transactions/${txnId}/check-status`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+      await api.post(`/admin/transactions/${txnId}/check-status`, {})
       alert('Status checked & updated')
       // Refresh transactions
-      const txnRes = await axios.get(`/api/admin/merchants/${id}/transactions`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+      const txnRes = await api.get(`/admin/merchants/${id}/transactions`)
       setTransactions(txnRes.data.data)
     } catch (error) {
       console.error('Error checking status:', error)
@@ -130,6 +140,106 @@ const AdminMerchantDetails = () => {
              {merchant.kycStatus.toUpperCase()}
            </span>
            <p className="text-sm text-gray-500 mt-2">Commission: {merchant.commissionTier} ({merchant.customCommissionRate || 'Default'}%)</p>
+        </div>
+      </div>
+
+      {/* KYC Documents */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div>
+            <h3 className="font-semibold text-gray-900">KYC Documents</h3>
+            <p className="text-sm text-gray-500 mt-1">Review and approve merchant documents</p>
+          </div>
+          <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+            merchant.kycStatus === 'approved' ? 'bg-green-100 text-green-800' :
+            merchant.kycStatus === 'under_review' ? 'bg-yellow-100 text-yellow-800' :
+            merchant.kycStatus === 'rejected' ? 'bg-red-100 text-red-800' :
+            'bg-gray-100 text-gray-800'
+          }`}>
+            {merchant.kycStatus.toUpperCase().replace('_', ' ')}
+          </span>
+        </div>
+        <div className="divide-y divide-gray-100">
+          {kycDocuments.length === 0 ? (
+            <div className="p-8 text-center text-gray-500">
+              <FileText className="w-12 h-12 mx-auto mb-3 opacity-20" />
+              <p>No KYC documents uploaded yet</p>
+            </div>
+          ) : (
+            kycDocuments.map((doc) => (
+              <div key={doc._id} className="p-6 hover:bg-gray-50 transition-colors">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-4">
+                    <div className={`p-2 rounded-lg ${
+                      doc.status === 'approved' ? 'bg-green-50 text-green-600' :
+                      doc.status === 'rejected' ? 'bg-red-50 text-red-600' :
+                      'bg-yellow-50 text-yellow-600'
+                    }`}>
+                      <FileText className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900 capitalize">
+                        {doc.documentType.replace('_', ' ')}
+                        {!doc.isRequired && <span className="text-gray-400 text-sm ml-2">(Optional)</span>}
+                      </h4>
+                      <p className="text-sm text-gray-500 mt-1">{doc.fileName}</p>
+                      <div className="flex items-center space-x-4 mt-2">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                          doc.status === 'approved' ? 'bg-green-100 text-green-800' :
+                          doc.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          Uploaded {new Date(doc.createdAt).toLocaleDateString()}
+                        </span>
+                        {doc.reviewedAt && (
+                          <span className="text-xs text-gray-400">
+                            Reviewed {new Date(doc.reviewedAt).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
+                      {doc.reviewerNotes && (
+                        <p className="text-sm text-gray-600 mt-2 italic">Note: {doc.reviewerNotes}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <a
+                      href={`http://localhost:5001${doc.fileUrl}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                      title="View Document"
+                    >
+                      <ExternalLink className="w-5 h-5" />
+                    </a>
+                    {doc.status !== 'approved' && (
+                      <button
+                        onClick={() => handleReviewDocument(doc._id, 'approved')}
+                        disabled={reviewingDoc === doc._id}
+                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50"
+                        title="Approve"
+                      >
+                        <CheckCircle className="w-5 h-5" />
+                      </button>
+                    )}
+                    {doc.status !== 'rejected' && (
+                      <button
+                        onClick={() => handleReviewDocument(doc._id, 'rejected')}
+                        disabled={reviewingDoc === doc._id}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                        title="Reject"
+                      >
+                        <XCircle className="w-5 h-5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
