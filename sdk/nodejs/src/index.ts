@@ -61,14 +61,14 @@ export class DigiPay {
 
   constructor(config: DigiPayConfig) {
     this.apiKey = config.apiKey;
-    
+
     // Determine base URL
     if (config.baseUrl) {
       this.baseUrl = config.baseUrl;
     } else if (config.environment === 'sandbox') {
-      this.baseUrl = 'https://sandbox.digitalcertify.net/v1/api';
+      this.baseUrl = 'https://sandbox.digitalcertify.tech/v1/api';
     } else {
-      this.baseUrl = 'https://digitalcertify.net/v1/api';
+      this.baseUrl = 'https://digitalcertify.tech/v1/api';
     }
 
     // Create axios instance
@@ -110,8 +110,8 @@ export class DigiPay {
       return response.data;
     } catch (error: any) {
       throw new Error(
-        error.response?.data?.message || 
-        error.message || 
+        error.response?.data?.message ||
+        error.message ||
         'Failed to create payment'
       );
     }
@@ -126,8 +126,8 @@ export class DigiPay {
       return response.data;
     } catch (error: any) {
       throw new Error(
-        error.response?.data?.message || 
-        error.message || 
+        error.response?.data?.message ||
+        error.message ||
         'Failed to verify payment'
       );
     }
@@ -142,8 +142,8 @@ export class DigiPay {
       return response.data;
     } catch (error: any) {
       throw new Error(
-        error.response?.data?.message || 
-        error.message || 
+        error.response?.data?.message ||
+        error.message ||
         'Failed to get payment'
       );
     }
@@ -158,8 +158,8 @@ export class DigiPay {
       return response.data.data || response.data;
     } catch (error: any) {
       throw new Error(
-        error.response?.data?.message || 
-        error.message || 
+        error.response?.data?.message ||
+        error.message ||
         'Failed to get balance'
       );
     }

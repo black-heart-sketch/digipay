@@ -40,9 +40,9 @@ class DigiPay:
         if base_url:
             self.base_url = base_url
         elif environment == 'sandbox':
-            self.base_url = 'https://sandbox.digitalcertify.net/v1/api'
+            self.base_url = 'https://sandbox.digitalcertify.tech/v1/api'
         else:
-            self.base_url = 'https://digitalcertify.net/v1/api'
+            self.base_url = 'https://digitalcertify.tech/v1/api'
         
         # Initialize payments namespace
         self.payments = PaymentsAPI(self)

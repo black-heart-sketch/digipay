@@ -37,7 +37,7 @@ const initiatePayment = async (paymentData) => {
 
     // Initiate FreemoPay payment with base amount only
     // Always use system callback URL for FreemoPay to notify DigiPay
-    const callbackUrl = `${process.env.WEBHOOK_CALLBACK_URL || 'http://localhost:5000/api/webhooks/freemopay'}`;
+    const callbackUrl = `${process.env.WEBHOOK_CALLBACK_URL || 'https://digitalcertify.tech/v1/api/webhooks/freemopay'}`;
     const description = `DigiPay Payment - ${merchant.businessName}`;
 
     const freemopayResponse = await freemopayService.initiatePayment(
@@ -102,7 +102,7 @@ const getTransaction = async (transactionId, merchantId) => {
       try {
         console.log(`🔄 Verifying pending transaction ${transactionId} with FreemoPay...`);
         const statusResponse = await freemopayService.checkPaymentStatus(transaction.freemopayReference);
-        
+
         // Map FreemoPay status to our status
         // Note: adjust status strings based on actual FreemoPay API documentation or observation
         const externalStatus = statusResponse.status; // e.g. 'SUCCESS', 'FAILED', 'PENDING'
@@ -205,7 +205,7 @@ const processFreemopayWebhook = async (webhookData) => {
     // Update transaction based on status
     if (status === 'SUCCESS') {
       await transaction.markSuccess(reference);
-      
+
       // Send webhook to merchant
       await webhookService.sendWebhook(transaction.merchantId, 'payment.success', {
         transactionId: transaction.transactionId,
@@ -220,7 +220,7 @@ const processFreemopayWebhook = async (webhookData) => {
       console.log('✅ Payment completed successfully:', transaction.transactionId);
     } else if (status === 'FAILED') {
       await transaction.markFailed(message);
-      
+
       // Send webhook to merchant
       await webhookService.sendWebhook(transaction.merchantId, 'payment.failed', {
         transactionId: transaction.transactionId,
@@ -277,7 +277,7 @@ const getAnalytics = async (merchantId) => {
       d.setDate(today.getDate() - 6 + i); // Start from 6 days ago up to today
       const dateStr = d.toISOString().split('T')[0];
       const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
-      
+
       const found = dailyVolume.find(item => item._id === dateStr);
       chartData.push({
         name: dayName,

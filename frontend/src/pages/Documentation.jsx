@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { 
-  Code, Terminal, ChevronRight, Copy, Check, Play, 
+import {
+  Code, Terminal, ChevronRight, Copy, Check, Play,
   Settings, Shield, CreditCard, Webhook, FileText
 } from 'lucide-react'
 import apiKeyService from '../services/apiKeyService'
@@ -86,7 +86,7 @@ const Documentation = () => {
   const [apiKeys, setApiKeys] = useState([])
   const [response, setResponse] = useState(null)
   const [loading, setLoading] = useState(false)
-  
+
   // State for editable body fields
   const [requestBody, setRequestBody] = useState({})
 
@@ -124,7 +124,7 @@ const Documentation = () => {
   }
 
   const generateCode = (endpoint, lang, key, body) => {
-    const baseUrl = 'https://digitalcertify.net/v1/api' // EC2 instance URL
+    const baseUrl = 'https://digitalcertify.tech/v1/api' // EC2 instance URL
     const url = `${baseUrl}${endpoint.path}`
     const k = key || 'YOUR_API_KEY'
     const payload = body && Object.keys(body).length > 0 ? body : endpoint.body
@@ -254,9 +254,9 @@ request.Content = new StringContent(json, System.Text.Encoding.UTF8, "applicatio
 var response = await client.SendAsync(request);
 var content = await response.Content.ReadAsStringAsync();
 Console.WriteLine(content);`
-      
+
       case 'swift':
-         return `import Foundation
+        return `import Foundation
 
 let url = URL(string: "${url}")!
 var request = URLRequest(url: url)
@@ -332,7 +332,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
       // In a real scenario, this would call the actual API endpoint
       // For this demo, we'll simulate a call to our backend proxy if needed
       // Or call the actual backend endpoint if it matches
-      
+
       const config = {
         method: endpoint.method,
         url: '/api' + endpoint.path,
@@ -345,39 +345,39 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
       // We use axios directly to bypass the bearer token interceptor if simulating external API key usage
       // But since we are logged in, we can also use the internal service
       // For accurate doc testing, we should probably stick to the documented way (API Key)
-      
+
       // NOTE: Since we are simulating an external developer, we should use the API key header
       // However, our backend might expect Bearer token for these specific internal routes
       // Let's try to simulate the response for demo purposes if the backend isn't ready for API key auth on these routes
-      
+
       // SIMULATION FOR DEMO
       await new Promise(resolve => setTimeout(resolve, 800))
-      
+
       if (endpoint.id === 'get-balance') {
-         setResponse({
-           success: true,
-           data: {
-             available: 154200,
-             currency: "XAF",
-             pending: 45000
-           }
-         })
+        setResponse({
+          success: true,
+          data: {
+            available: 154200,
+            currency: "XAF",
+            pending: 45000
+          }
+        })
       } else if (endpoint.id === 'initiate-payment') {
-         setResponse({
-           success: true,
-           message: "Payment initiated successfully",
-           data: {
-             transactionId: "TXN_" + Math.random().toString(36).substr(2, 9).toUpperCase(),
-             amount: requestBody.amount ? Math.round(requestBody.amount * 1.05) : 5250,
-             baseAmount: requestBody.amount || 5000,
-             commissionAmount: requestBody.amount ? Math.round(requestBody.amount * 0.05) : 250,
-             status: "pending",
-             digipayReference: "MTN_" + Date.now(),
-             message: "Transaction created"
-           }
-         })
+        setResponse({
+          success: true,
+          message: "Payment initiated successfully",
+          data: {
+            transactionId: "TXN_" + Math.random().toString(36).substr(2, 9).toUpperCase(),
+            amount: requestBody.amount ? Math.round(requestBody.amount * 1.05) : 5250,
+            baseAmount: requestBody.amount || 5000,
+            commissionAmount: requestBody.amount ? Math.round(requestBody.amount * 0.05) : 250,
+            status: "pending",
+            digipayReference: "MTN_" + Date.now(),
+            message: "Transaction created"
+          }
+        })
       } else {
-         setResponse({ success: true, message: "Request received" })
+        setResponse({ success: true, message: "Request received" })
       }
 
     } catch (error) {
@@ -397,7 +397,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     <div className="bg-gray-50 min-h-screen pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
-          
+
           {/* Sidebar Navigation */}
           <div className="w-full lg:w-64 flex-shrink-0 space-y-8">
             <div>
@@ -426,21 +426,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                   <button
                     key={endpoint.id}
                     onClick={() => setActiveTab(endpoint.id)}
-                    className={`w-full text-left px-3 py-2 text-sm font-medium rounded-md flex items-center justify-between group ${
-                      activeTab === endpoint.id
+                    className={`w-full text-left px-3 py-2 text-sm font-medium rounded-md flex items-center justify-between group ${activeTab === endpoint.id
                         ? 'text-primary-700 bg-primary-50'
                         : 'text-gray-600 hover:bg-gray-50'
-                    }`}
+                      }`}
                   >
                     <span>{endpoint.title}</span>
-                    <ChevronRight className={`w-4 h-4 text-gray-400 transition-transform ${
-                      activeTab === endpoint.id ? 'rotate-90 text-primary-500' : ''
-                    }`} />
+                    <ChevronRight className={`w-4 h-4 text-gray-400 transition-transform ${activeTab === endpoint.id ? 'rotate-90 text-primary-500' : ''
+                      }`} />
                   </button>
                 ))}
               </nav>
             </div>
-            
+
             <div className="bg-gradient-to-br from-primary-600 to-accent-600 rounded-xl p-6 text-white text-center">
               <Shield className="w-8 h-8 mx-auto mb-3 opacity-90" />
               <h4 className="font-bold mb-2">Need help?</h4>
@@ -456,11 +454,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="p-6 border-b border-gray-100">
                 <div className="flex items-center space-x-3 mb-2">
-                  <span className={`px-2 py-1 text-xs font-bold rounded uppercase ${
-                    activeEndpoint.method === 'GET' ? 'bg-blue-100 text-blue-700' :
-                    activeEndpoint.method === 'POST' ? 'bg-green-100 text-green-700' :
-                    'bg-yellow-100 text-yellow-700'
-                  }`}>
+                  <span className={`px-2 py-1 text-xs font-bold rounded uppercase ${activeEndpoint.method === 'GET' ? 'bg-blue-100 text-blue-700' :
+                      activeEndpoint.method === 'POST' ? 'bg-green-100 text-green-700' :
+                        'bg-yellow-100 text-yellow-700'
+                    }`}>
                     {activeEndpoint.method}
                   </span>
                   <h1 className="text-2xl font-bold text-gray-900">{activeEndpoint.title}</h1>
@@ -488,16 +485,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     ))}
                   </select>
                 </div>
-                
+
                 {activeEndpoint.body && (
                   <>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
                       <div>
                         <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                           Amount
+                          Amount
                         </label>
-                        <input 
-                          type="number" 
+                        <input
+                          type="number"
                           value={requestBody.amount || ''}
                           onChange={(e) => handleBodyChange('amount', Number(e.target.value))}
                           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
@@ -506,10 +503,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                       </div>
                       <div>
                         <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                           Phone
+                          Phone
                         </label>
-                        <input 
-                          type="text" 
+                        <input
+                          type="text"
                           value={requestBody.customerPhone || ''}
                           onChange={(e) => handleBodyChange('customerPhone', e.target.value)}
                           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
@@ -518,10 +515,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                       </div>
                       <div>
                         <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                           Email
+                          Email
                         </label>
-                        <input 
-                          type="email" 
+                        <input
+                          type="email"
                           value={requestBody.customerEmail || ''}
                           onChange={(e) => handleBodyChange('customerEmail', e.target.value)}
                           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
@@ -530,10 +527,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                       </div>
                       <div>
                         <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                           Webhook URL
+                          Webhook URL
                         </label>
-                        <input 
-                          type="text" 
+                        <input
+                          type="text"
                           value={requestBody.webhookUrl || ''}
                           onChange={(e) => handleBodyChange('webhookUrl', e.target.value)}
                           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
@@ -552,7 +549,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-semibold text-gray-900">Request Example</h3>
                     <div className="flex space-x-2">
-                      <select 
+                      <select
                         value={activeLang}
                         onChange={(e) => setActiveLang(e.target.value)}
                         className="text-sm border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500"
@@ -563,9 +560,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                       </select>
                     </div>
                   </div>
-                  <CodeBlock 
-                    language={LANGUAGES[activeLang].syntax} 
-                    code={generateCode(activeEndpoint, activeLang, apiKey, requestBody)} 
+                  <CodeBlock
+                    language={LANGUAGES[activeLang].syntax}
+                    code={generateCode(activeEndpoint, activeLang, apiKey, requestBody)}
                   />
                 </div>
 
@@ -590,18 +587,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                   {response ? (
                     <div className="space-y-2 animate-fade-in">
                       <div className="flex items-center justify-between text-xs">
-                        <span className={`font-medium ${
-                          response.success !== false ? 'text-green-600' : 'text-red-600'
-                        }`}>
+                        <span className={`font-medium ${response.success !== false ? 'text-green-600' : 'text-red-600'
+                          }`}>
                           Status: {response.success !== false ? '200 OK' : 'Error'}
                         </span>
                         <span className="text-gray-500">Time: 124ms</span>
                       </div>
-                      <pre className={`p-4 rounded-lg overflow-x-auto text-xs font-mono border ${
-                        response.success !== false 
-                          ? 'bg-green-50 border-green-100 text-green-900' 
+                      <pre className={`p-4 rounded-lg overflow-x-auto text-xs font-mono border ${response.success !== false
+                          ? 'bg-green-50 border-green-100 text-green-900'
                           : 'bg-red-50 border-red-100 text-red-900'
-                      }`}>
+                        }`}>
                         {JSON.stringify(response, null, 2)}
                       </pre>
                     </div>

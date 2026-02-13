@@ -1,53 +1,64 @@
-import api from './api';
+import BaseService from './BaseService';
 
 /**
- * Get all commission tiers
+ * Rate service with real-time updates for commission tiers
  */
-const getAllTiers = async (includeInactive = false) => {
-  const response = await api.get('/admin/rates', {
-    params: { includeInactive },
-  });
-  return response.data.data;
-};
+class RateService extends BaseService {
+  constructor() {
+    super('commissiontiers', 'admin/rates');
+  }
 
-/**
- * Create new commission tier
- */
-const createTier = async (tierData) => {
-  const response = await api.post('/admin/rates', tierData);
-  return response.data;
-};
+  /**
+   * Get all commission tiers
+   * @param {Boolean} includeInactive - Include inactive tiers
+   * @returns {Promise} List of commission tiers
+   */
+  async getAllTiers(includeInactive = false) {
+    return this.getData({ params: { includeInactive } });
+  }
 
-/**
- * Update commission tier
- */
-const updateTier = async (tierId, tierData) => {
-  const response = await api.patch(`/admin/rates/${tierId}`, tierData);
-  return response.data;
-};
+  /**
+   * Create new commission tier
+   * @param {Object} tierData - Tier data { name, description, rate, minTransactionVolume, features }
+   * @returns {Promise} Created tier
+   */
+  async createTier(tierData) {
+    return this.create(tierData);
+  }
 
-/**
- * Delete commission tier (soft delete)
- */
-const deleteTier = async (tierId) => {
-  const response = await api.delete(`/admin/rates/${tierId}`);
-  return response.data;
-};
+  /**
+   * Update commission tier
+   * @param {String} tierId - ID of the tier to update
+   * @param {Object} tierData - Updated tier data
+   * @returns {Promise} Updated tier
+   */
+  async updateTier(tierId, tierData) {
+    // BaseService uses PUT, but backend expects PATCH
+    const response = await this.client.patch(`/${this.endpoint}/${tierId}`, tierData);
+    return response.data;
+  }
 
-/**
- * Set custom commission rate for merchant
- */
-const setMerchantRate = async (merchantId, customCommissionRate) => {
-  const response = await api.patch(`/admin/rates/merchants/${merchantId}/rate`, {
-    customCommissionRate,
-  });
-  return response.data;
-};
+  /**
+   * Delete commission tier (soft delete)
+   * @param {String} tierId - ID of the tier to delete
+   * @returns {Promise} Delete response
+   */
+  async deleteTier(tierId) {
+    return this.delete(tierId);
+  }
 
-export default {
-  getAllTiers,
-  createTier,
-  updateTier,
-  deleteTier,
-  setMerchantRate,
-};
+  /**
+   * Set custom commission rate for merchant
+   * @param {String} merchantId - ID of the merchant
+   * @param {Number} customCommissionRate - Custom commission rate
+   * @returns {Promise} Updated merchant data
+   */
+  async setMerchantRate(merchantId, customCommissionRate) {
+    const response = await this.client.patch(`/${this.endpoint}/merchants/${merchantId}/rate`, {
+      customCommissionRate,
+    });
+    return response.data;
+  }
+}
+
+export default new RateService();

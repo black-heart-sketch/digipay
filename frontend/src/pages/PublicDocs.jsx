@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { 
-  Code, Terminal, ChevronRight, Copy, Check, Play, 
+import {
+  Code, Terminal, ChevronRight, Copy, Check, Play,
   Settings, Shield, CreditCard, Webhook, FileText,
   Coins, ArrowRight, BookOpen, Layers, Zap, Globe
 } from 'lucide-react'
@@ -225,9 +225,9 @@ const CodeBlock = ({ code, language }) => {
     <div className="relative group rounded-lg overflow-hidden border border-gray-800 shadow-2xl">
       <div className="flex items-center justify-between px-4 py-2 bg-gray-900 border-b border-gray-800">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-red-500"/>
-          <div className="w-3 h-3 rounded-full bg-yellow-500"/>
-          <div className="w-3 h-3 rounded-full bg-green-500"/>
+          <div className="w-3 h-3 rounded-full bg-red-500" />
+          <div className="w-3 h-3 rounded-full bg-yellow-500" />
+          <div className="w-3 h-3 rounded-full bg-green-500" />
         </div>
         <div className="text-xs text-gray-500 font-mono">
           {language || 'text'}
@@ -251,12 +251,12 @@ const CodeBlock = ({ code, language }) => {
 const PublicDocs = () => {
   const [activeTab, setActiveTab] = useState('intro')
   const [activeLang, setActiveLang] = useState('curl')
-  
+
   const generateCode = (endpoint, lang) => {
-    const baseUrl = 'https://digitalcertify.net/v1/api'
+    const baseUrl = 'https://digitalcertify.tech/v1/api'
     const url = `${baseUrl}${endpoint.path}`
     const key = 'YOUR_API_KEY'
-    
+
     switch (lang) {
       case 'curl':
         return `curl -X ${endpoint.method} "${url}" \\
@@ -549,7 +549,7 @@ print(table.concat(response_body))`
   {:ok, %HTTPoison.Response{body: body}} -> IO.puts(body)
   {:error, %HTTPoison.Error{reason: reason}} -> IO.inspect(reason)
 end`
-        
+
       default: return '// Select a language'
     }
   }
@@ -585,36 +585,35 @@ end`
       {/* Hero Section */}
       <div className="bg-gray-900 text-white py-16 text-center relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-white/[0.05] bg-[length:24px_24px]" />
-         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <h1 className="text-5xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
-              DigiPay Developer API
-            </h1>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              Integrate payments into your application with just a few lines of code.
-              <br/>
-              <span className="text-gray-500 text-sm mt-2 block">Supported in {Object.keys(LANGUAGES).length}+ languages</span>
-            </p>
-         </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <h1 className="text-5xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
+            DigiPay Developer API
+          </h1>
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+            Integrate payments into your application with just a few lines of code.
+            <br />
+            <span className="text-gray-500 text-sm mt-2 block">Supported in {Object.keys(LANGUAGES).length}+ languages</span>
+          </p>
+        </div>
       </div>
 
       {/* Main Content */}
       <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex flex-col lg:flex-row gap-8">
-          
+
           {/* Sidebar */}
           <div className="w-full lg:w-64 flex-shrink-0 space-y-8 sticky top-24 self-start max-h-[calc(100vh-8rem)] overflow-y-auto custom-scrollbar">
-             <div>
+            <div>
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 pl-3">Guides</h3>
               <nav className="space-y-1">
                 {ENDPOINTS.filter(e => e.type === 'guide').map(item => (
                   <button
                     key={item.id}
                     onClick={() => setActiveTab(item.id)}
-                    className={`w-full text-left px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                      activeTab === item.id 
-                        ? 'bg-white text-primary-700 shadow-md ring-1 ring-black/5' 
+                    className={`w-full text-left px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${activeTab === item.id
+                        ? 'bg-white text-primary-700 shadow-md ring-1 ring-black/5'
                         : 'text-gray-600 hover:bg-gray-200/50'
-                    }`}
+                      }`}
                   >
                     {item.title}
                   </button>
@@ -629,17 +628,15 @@ end`
                   <button
                     key={item.id}
                     onClick={() => setActiveTab(item.id)}
-                    className={`w-full text-left px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 group flex items-center justify-between ${
-                      activeTab === item.id 
-                        ? 'bg-white text-primary-700 shadow-md ring-1 ring-black/5' 
+                    className={`w-full text-left px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 group flex items-center justify-between ${activeTab === item.id
+                        ? 'bg-white text-primary-700 shadow-md ring-1 ring-black/5'
                         : 'text-gray-600 hover:bg-gray-200/50'
-                    }`}
+                      }`}
                   >
                     <span>{item.title}</span>
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider ${
-                      item.method === 'GET' ? 'bg-blue-100 text-blue-700 group-hover:bg-blue-200' : 
-                      item.method === 'POST' ? 'bg-green-100 text-green-700 group-hover:bg-green-200' : 'bg-gray-200 text-gray-700'
-                    }`}>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider ${item.method === 'GET' ? 'bg-blue-100 text-blue-700 group-hover:bg-blue-200' :
+                        item.method === 'POST' ? 'bg-green-100 text-green-700 group-hover:bg-green-200' : 'bg-gray-200 text-gray-700'
+                      }`}>
                       {item.method}
                     </span>
                   </button>
@@ -650,131 +647,130 @@ end`
 
           {/* Docs Content */}
           <div className="flex-1 min-w-0">
-             <div className="bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
-                <div className="p-8 md:p-10">
-                   <div className="mb-8 pb-8 border-b border-gray-100">
-                      <div className="flex items-center gap-3 mb-4">
-                        {activeContent.type === 'endpoint' && (
-                          <span className={`px-3 py-1 rounded-lg font-bold text-sm uppercase ${
-                              activeContent.method === 'GET' ? 'bg-blue-600 text-white' : 'bg-green-600 text-white'
-                          }`}>
-                              {activeContent.method}
-                          </span>
-                        )}
-                        <h2 className="text-3xl font-extrabold text-gray-900">{activeContent.title}</h2>
-                      </div>
-                      <p className="text-lg text-gray-600 leading-relaxed">{activeContent.description}</p>
-                   </div>
-
-                   {activeContent.type === 'guide' ? (
-                      <div className="prose max-w-none text-gray-600">
-                        {activeContent.isSDKSection ? (
-                          <div>
-                            <p className="text-gray-600 mb-8 text-lg">
-                              We provide official SDKs for the most popular programming languages to help you integrate faster.
-                            </p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                              {SDK_INSTALLATIONS.map((sdk, idx) => (
-                                <SDKCard key={idx} {...sdk} />
-                              ))}
-                            </div>
-                          </div>
-                        ) : activeContent.content ? (
-                          <div className="whitespace-pre-wrap font-sans">
-                             {activeContent.content.split('\n').map((line, i) => {
-                               if (line.startsWith('```')) {
-                                  // Very basic parsing for guide blocks to separate title/lang
-                                  return null; 
-                               }
-                               if (line.trim().startsWith('```')) {
-                                  // Hacky way to render code blocks in guide for now without full MD parser
-                                  return <div key={i} className="my-4"><CodeBlock code={line.replace(/```\w*/, '').replace(/```/, '').trim()} language="bash" /></div>;
-                               }
-                               if (line.trim().startsWith('###')) return <h3 key={i} className="text-xl font-bold text-gray-900 mt-6 mb-3">{line.replace('###', '')}</h3>
-                               if (line.trim().startsWith('**')) return <p key={i} className="font-bold mt-2">{line.replace(/\*\*/g, '')}</p>
-                               if (line.trim() === '') return <br key={i}/>
-                               return <p key={i}>{line}</p>
-                             })}
-                          </div>
-                        ) : null}
-                      </div>
-                   ) : (
-                      <div className="space-y-12">
-                         {/* Endpoint URL */}
-                         <div>
-                           <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Endpoint</h3>
-                           <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-xl border border-gray-200 font-mono text-sm shadow-sm">
-                              <span className="text-gray-400 select-none">https://digitalcertify.net/v1/api</span>
-                              <span className="text-gray-900 font-semibold">{activeContent.path}</span>
-                           </div>
-                         </div>
-
-                         {/* Parameters */}
-                         {activeContent.body && (
-                            <div>
-                               <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Request Body</h3>
-                               <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                                  <table className="min-w-full divide-y divide-gray-200">
-                                     <thead className="bg-gray-50">
-                                        <tr>
-                                           <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Parameter</th>
-                                           <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Type</th>
-                                           <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Description/Example</th>
-                                        </tr>
-                                     </thead>
-                                     <tbody className="bg-white divide-y divide-gray-200">
-                                        {Object.entries(activeContent.body).map(([key, value]) => (
-                                           <tr key={key}>
-                                              <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 font-mono">{key}</td>
-                                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">{typeof value}</td>
-                                              <td className="px-6 py-4 text-sm text-gray-500">
-                                                 <span className="font-mono bg-gray-100 px-2 py-1 rounded text-gray-700 text-xs">{typeof value === 'object' ? JSON.stringify(value) : value}</span>
-                                              </td>
-                                           </tr>
-                                        ))}
-                                     </tbody>
-                                  </table>
-                                </div>
-                            </div>
-                         )}
-
-                         {/* Code Example Card */}
-                         <div>
-                            <div className="flex items-center justify-between mb-4">
-                               <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Request Example</h3>
-                            </div>
-                            
-                            <div className="rounded-xl overflow-hidden border border-gray-800 shadow-2xl bg-[#0d1117]">
-                              {/* Language Tabs */}
-                              <div className="flex items-center gap-1 p-2 border-b border-gray-800 overflow-x-auto no-scrollbar mask-gradient-r">
-                                {Object.entries(LANGUAGES).map(([key, lang]) => (
-                                  <button 
-                                    key={key}
-                                    onClick={() => setActiveLang(key)}
-                                    className={`
-                                      flex-shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all
-                                      ${activeLang === key 
-                                        ? 'bg-gray-800 text-white shadow-sm ring-1 ring-white/10' 
-                                        : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800/50'}
-                                    `}
-                                  >
-                                    <span>{lang.icon}</span>
-                                    <span>{lang.name}</span>
-                                  </button>
-                                ))}
-                              </div>
-
-                              {/* Code Area */}
-                              <CodeBlock 
-                                code={generateCode(activeContent, activeLang)} 
-                                language={LANGUAGES[activeLang].syntax} 
-                              />
-                            </div>
-                         </div>
-                      </div>
-                   )}
+            <div className="bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
+              <div className="p-8 md:p-10">
+                <div className="mb-8 pb-8 border-b border-gray-100">
+                  <div className="flex items-center gap-3 mb-4">
+                    {activeContent.type === 'endpoint' && (
+                      <span className={`px-3 py-1 rounded-lg font-bold text-sm uppercase ${activeContent.method === 'GET' ? 'bg-blue-600 text-white' : 'bg-green-600 text-white'
+                        }`}>
+                        {activeContent.method}
+                      </span>
+                    )}
+                    <h2 className="text-3xl font-extrabold text-gray-900">{activeContent.title}</h2>
+                  </div>
+                  <p className="text-lg text-gray-600 leading-relaxed">{activeContent.description}</p>
                 </div>
-             </div>
+
+                {activeContent.type === 'guide' ? (
+                  <div className="prose max-w-none text-gray-600">
+                    {activeContent.isSDKSection ? (
+                      <div>
+                        <p className="text-gray-600 mb-8 text-lg">
+                          We provide official SDKs for the most popular programming languages to help you integrate faster.
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {SDK_INSTALLATIONS.map((sdk, idx) => (
+                            <SDKCard key={idx} {...sdk} />
+                          ))}
+                        </div>
+                      </div>
+                    ) : activeContent.content ? (
+                      <div className="whitespace-pre-wrap font-sans">
+                        {activeContent.content.split('\n').map((line, i) => {
+                          if (line.startsWith('```')) {
+                            // Very basic parsing for guide blocks to separate title/lang
+                            return null;
+                          }
+                          if (line.trim().startsWith('```')) {
+                            // Hacky way to render code blocks in guide for now without full MD parser
+                            return <div key={i} className="my-4"><CodeBlock code={line.replace(/```\w*/, '').replace(/```/, '').trim()} language="bash" /></div>;
+                          }
+                          if (line.trim().startsWith('###')) return <h3 key={i} className="text-xl font-bold text-gray-900 mt-6 mb-3">{line.replace('###', '')}</h3>
+                          if (line.trim().startsWith('**')) return <p key={i} className="font-bold mt-2">{line.replace(/\*\*/g, '')}</p>
+                          if (line.trim() === '') return <br key={i} />
+                          return <p key={i}>{line}</p>
+                        })}
+                      </div>
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="space-y-12">
+                    {/* Endpoint URL */}
+                    <div>
+                      <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Endpoint</h3>
+                      <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-xl border border-gray-200 font-mono text-sm shadow-sm">
+                        <span className="text-gray-400 select-none">https://digitalcertify.tech/v1/api</span>
+                        <span className="text-gray-900 font-semibold">{activeContent.path}</span>
+                      </div>
+                    </div>
+
+                    {/* Parameters */}
+                    {activeContent.body && (
+                      <div>
+                        <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Request Body</h3>
+                        <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                          <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Parameter</th>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Type</th>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Description/Example</th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                              {Object.entries(activeContent.body).map(([key, value]) => (
+                                <tr key={key}>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 font-mono">{key}</td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">{typeof value}</td>
+                                  <td className="px-6 py-4 text-sm text-gray-500">
+                                    <span className="font-mono bg-gray-100 px-2 py-1 rounded text-gray-700 text-xs">{typeof value === 'object' ? JSON.stringify(value) : value}</span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Code Example Card */}
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Request Example</h3>
+                      </div>
+
+                      <div className="rounded-xl overflow-hidden border border-gray-800 shadow-2xl bg-[#0d1117]">
+                        {/* Language Tabs */}
+                        <div className="flex items-center gap-1 p-2 border-b border-gray-800 overflow-x-auto no-scrollbar mask-gradient-r">
+                          {Object.entries(LANGUAGES).map(([key, lang]) => (
+                            <button
+                              key={key}
+                              onClick={() => setActiveLang(key)}
+                              className={`
+                                      flex-shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all
+                                      ${activeLang === key
+                                  ? 'bg-gray-800 text-white shadow-sm ring-1 ring-white/10'
+                                  : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800/50'}
+                                    `}
+                            >
+                              <span>{lang.icon}</span>
+                              <span>{lang.name}</span>
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Code Area */}
+                        <CodeBlock
+                          code={generateCode(activeContent, activeLang)}
+                          language={LANGUAGES[activeLang].syntax}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
