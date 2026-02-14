@@ -105,7 +105,7 @@ app.use('/v1/api/admin', require('./routes/adminRoutes'));
 app.use('/v1/api/admin/rates', rateRoutes);
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/v1/api/health', (req, res) => {
   res.status(200).json({
     success: true,
     message: 'DigiPay API is running',
@@ -115,7 +115,7 @@ app.get('/health', (req, res) => {
 });
 
 // Welcome route
-app.get('/', (req, res) => {
+app.get('/v1/api', (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Welcome to DigiPay API',

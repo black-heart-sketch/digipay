@@ -1,7 +1,7 @@
 import axios from 'axios';
 import socketService from './socket';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/v1/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://digitalcertify.tech/v1/api';
 
 /**
  * Base service class with real-time updates via Socket.IO
@@ -47,7 +47,7 @@ class BaseService {
    */
   initializeSocketListeners() {
     socketService.connect();
-    
+
     // Subscribe to collection changes
     socketService.subscribe(this.collectionName);
 
@@ -120,7 +120,7 @@ class BaseService {
    */
   subscribe(callback) {
     this.subscribers.add(callback);
-    
+
     // Return unsubscribe function
     return () => {
       this.subscribers.delete(callback);
@@ -147,13 +147,13 @@ class BaseService {
     }
 
     const response = await this.client.get(`/${this.endpoint}`, config);
-    
+
     // Only update cache if it's a general fetch (no search/filters), 
     // or we might overwrite full list with filtered results.
     // For simplicity in this user's case, we'll update it but ideally we should manage filtered state separately.
     // Given the "Dashboard" vs "Transactions" view contention, strictly updating this.data on every fetch
     // might be why Dashboard sees only what Transactions page fetched or vice versa.
-    
+
     // Better strategy for this specific issue:
     // If filters are present, do NOT update this.data (global cache), just return result.
     if (config.params && Object.keys(config.params).length > 0) {
